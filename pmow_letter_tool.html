@@ -303,9 +303,10 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
         <div class="field-group">
           <label class="field-label">Acknowledgment status</label>
           <select id="filterAck">
-            <option value="">All</option>
-            <option value="To Be Acknowledged" selected>To Be Acknowledged</option>
+            <option value="" selected>All</option>
+            <option value="To Be Acknowledged">To Be Acknowledged</option>
             <option value="Acknowledged">Acknowledged</option>
+            <option value="Do Not Acknowledge">Do Not Acknowledge</option>
           </select>
         </div>
 
@@ -391,14 +392,8 @@ textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
       <!-- SETTINGS TAB -->
       <div class="panel-content hidden" id="tab-settings">
         <div class="section-heading">Claude API</div>
-        <div class="notice notice-info">Your API key is stored only in this browser session — never saved to disk or sent anywhere except Anthropic's API.</div>
-        <div class="field-group mt-8">
-          <label class="field-label">API Key <span class="req">*</span></label>
-          <div class="api-key-row">
-            <input type="password" id="apiKey" placeholder="sk-ant-...">
-            <button class="btn btn-secondary btn-sm" onclick="toggleKey()">Show</button>
-          </div>
-        </div>
+        <div class="notice notice-success">✓ API key is stored securely in Cloudflare Worker — no key needed here.</div>
+        <input type="hidden" id="apiKey" value="proxy">
         <div class="field-group">
           <label class="field-label">Model</label>
           <select id="modelSelect">
@@ -627,12 +622,7 @@ function setLetterType(t) {
 
 // ===== LETTER GENERATION =====
 async function generateLetters() {
-  const apiKey = document.getElementById('apiKey').value.trim();
-  if(!apiKey) {
-    showMsg('Please enter your Claude API key in Settings first.', 'error');
-    showTab('settings');
-    return;
-  }
+  const apiKey = ''; // API key stored securely in Cloudflare Worker
 
   const selected = allDonors.filter(d => selectedIds.has(d._id));
   if(selected.length === 0) {
@@ -731,9 +721,9 @@ Write ONLY the letter body paragraphs (no date, no address block, no salutation 
 - No markdown formatting, just plain paragraphs separated by blank lines
 `;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch('https://pmow-proxy.jeff-117.workers.dev', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model, max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
   });
 

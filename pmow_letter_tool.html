@@ -733,6 +733,8 @@ Write ONLY the letter body paragraphs (no date, no address block, no salutation 
   }
 
   const data = await response.json();
+  if(data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  if(!data.content || !data.content[0]) throw new Error('Unexpected response: ' + JSON.stringify(data));
   return data.content[0].text;
 }
 
